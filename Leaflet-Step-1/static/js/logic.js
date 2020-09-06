@@ -1,6 +1,3 @@
-// Create our map, giving it the satellitemap and earthquakes layers to display on load
-var myMap = L.map("map").setView([37.09, -95.71], 5);
-
 //Grab URL
 var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
@@ -12,10 +9,11 @@ d3.json(queryUrl, function (data) {
 });
 
 function createFeatures(earthquakeData) {
-  // Define satellitemap and darkmap layers
+
+// Define base map layers
+//satellite
   var satellite = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
-    // tileSize: 512,
     maxZoom: 18,
     id: "mapbox/satellite-streets-v11",
     tileSize: 512,
@@ -23,6 +21,7 @@ function createFeatures(earthquakeData) {
     accessToken: API_KEY
   });
 
+  //Grayscle (light)
   var grayScale = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
       '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -34,6 +33,7 @@ function createFeatures(earthquakeData) {
     accessToken: API_KEY
   });
 
+  //Outdoors
   var outdoors = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
     maxZoom: 18,
@@ -43,33 +43,43 @@ function createFeatures(earthquakeData) {
     accessToken: API_KEY
   });
 
+  // Create map
+  var myMap = L.map("map").setView([37.09, -95.71], 5);
 
   //Array to holds all circles
   var circleArray = [];
 
   //Loop through the location array and create one marker for each earthquake object
-
   for (var i = 0; i < earthquakeData.length; i++) {
     coordinates = [earthquakeData[i].geometry.coordinates[1], earthquakeData[i].geometry.coordinates[0]]
     properties = earthquakeData[i].properties;
 
-    //   // Conditionals for countries points
+      // Conditionals for countries points
     var color = "";
 
     if (properties.mag < 1) {
-      color = "green";
+      //green
+      color = "#00ff00";
     }
     else if (properties.mag < 2) {
-      color = "yellow";
+      //yellow
+      color = "#d4ee00";
     }
     else if (properties.mag < 3) {
-      color = "orange";
+      //orange
+      color = "#ffa500";
     }
     else if (properties.mag < 4) {
-      color = "purple";
+      //purple
+      color = "#800080";
+    }
+    else if (properties.mag < 5) {
+      //red
+      color = "#ff0000";
     }
     else {
-      color = "red";
+      //blue
+      color = "#0000ff";
     }
 
     // Add circles to map
@@ -79,7 +89,7 @@ function createFeatures(earthquakeData) {
       fillColor: color,
       // Adjust radius
       radius: (properties.mag * 20000)
-    }).bindPopup("<h1>" + properties.place + "</h1> <hr> <h3>Magnitud: " + properties.mag.toFixed(2) + "</h3>");
+    }).bindPopup("<h1>" + properties.place + "</h1> <hr> <h3>Magnitude: " + properties.mag.toFixed(2) + "</h3>");
     //Add the cricle to the array
     circleArray.push(myCircle);
 
@@ -87,9 +97,9 @@ function createFeatures(earthquakeData) {
     var earthquakes = L.layerGroup(circleArray);
   };
 
-  // Define a baseMaps object to hold our base layers
+  // Define baseMaps object to hold base layers
   var baseMaps = {
-    "Satelite": satellite,
+    "Satellite": satellite,
     "GrayScale": grayScale,
     "Outdoors": outdoors
   };
@@ -105,28 +115,39 @@ function createFeatures(earthquakeData) {
   // Add the layer control to the map
   L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(myMap);
 
-  // Custom legend control
-  var legend = L.control({ position: 'bottomright' });
-
-  legend.onAdd = function (map) {
-    var div = L.DomUtil.create('div', 'info legend');
-    var mag = ["0-1", "1-2", "2-3", "3-4", "5+"],
-    // var getColor = ["#00ccbc", "#90eb9d", "#f9d057", "#f29e2e", "#e76818", "#d7191c"];
-
-    // loop through our density intervals and generate a label with a colored square for each interval
-    for (var i = 0; i < mag.length; i++) {
-      div.innerHTML +=
-        '<i style="background-color:' + color(mag[i] + 1) + '"></i> ' +
-        mag[i] + (mag[i + 1] ? '&ndash;' + mag[i + 1] + '<br>' : '+');
-
-      return div;
+      // color function to be used when creating the legend
+    function getColors(d) {
+      return d > 5  ? '#0000ff' :
+             d > 4  ? '#ff0000' :
+             d > 3  ? '#800080' :
+             d > 2  ? '#ffa500' :
+             d > 1  ? '#d4ee00' :
+                      '#00ff00';
     }
-  };
 
-  //Add the legend by default
-  legend.addTo(map);
+    // Custom legend control
+    //legend position
+    var legend = L.control({position: "bottomright"});
+  
+  legend.onAdd = function (map) {
+    var div = L.DomUtil.create('div', 'info legend'),
+        magnitude = [0, 1, 2, 3, 4, 5],
+        labels = [];
+ 
+    
+       //Create a loop o go through the density intervals and generate labels
+       for (var i = 0; i < magnitude.length; i++)
+       {
+         div.innerHTML +=
+           '<i style="background:' + getColors(magnitude[i] + 1) + '"></i> ' +
+           magnitude[i] + (magnitude[i + 1] ? '&ndash;' + magnitude[i + 1] + '<br>' : '+');
+       }
+       console.log('div' + div);
+     return div;
+   };
 
   //Overlay listener for adding
+  //Add the legend by default
   myMap.on('overlayadd', function (a) {
     //Add the legend
     legend.addTo(myMap);
