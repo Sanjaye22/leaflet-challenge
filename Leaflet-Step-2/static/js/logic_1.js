@@ -4,8 +4,7 @@ var plateUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/G
 
 // Perform a GET request to the earthquake URL
 d3.json(earthquakeUrl, function (data) {
-  // console.log(data)
-  // Once we get a response, send the data.features object to the createMap function
+    // Once we get a response, send the data.features object to the createMap function
   createMap(data.features);
 });
 
@@ -55,7 +54,7 @@ function createMap(earthquakeData) {
     coordinates = [earthquakeData[i].geometry.coordinates[1], earthquakeData[i].geometry.coordinates[0]]
     properties = earthquakeData[i].properties;
 
-      // Conditionals for countries points
+      // Conditionals for magnitude colors
     var color = "";
 
     if (properties.mag < 1) {
@@ -126,19 +125,18 @@ function createMap(earthquakeData) {
     .addTo(tectonicplates);
 });
   
-
   //Create a layer control
   // Pass in our baseMaps and overlayMaps
   // Add the layer control to the map
   L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(myMap);
 
-      // color function to be used when creating the legend
-    function getColors(d) {
-      return d > 5  ? '#0000ff' :
-             d > 4  ? '#ff0000' :
-             d > 3  ? '#800080' :
-             d > 2  ? '#ffa500' :
-             d > 1  ? '#d4ee00' :
+  // color function to be used when creating the legend
+    function getColors(magnitude) {
+      return magnitude > 5  ? '#0000ff' :
+             magnitude > 4  ? '#ff0000' :
+             magnitude > 3  ? '#800080' :
+             magnitude > 2  ? '#ffa500' :
+             magnitude > 1  ? '#d4ee00' :
                       '#00ff00';
     }
 
