@@ -1,14 +1,15 @@
-//Grab URL
-var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
+//Grab URLs
+var earthquakeUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
+var plateUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_plates.json"
 
-// Perform a GET request to the query URL
-d3.json(queryUrl, function (data) {
-  console.log(data)
-  // Once we get a response, send the data.features object to the createFeatures function
-  createFeatures(data.features);
+// Perform a GET request to the earthquake URL
+d3.json(earthquakeUrl, function (data) {
+  // console.log(data)
+  // Once we get a response, send the data.features object to the createMap function
+  createMap(data.features);
 });
 
-function createFeatures(earthquakeData) {
+function createMap(earthquakeData) {
 
 // Define base map layers
 //satellite
@@ -95,6 +96,9 @@ function createFeatures(earthquakeData) {
 
     //Create the layer for the circles
     var earthquakes = L.layerGroup(circleArray);
+
+    // Creat a layer for the tectonic plates
+    var tectonicplates = new L.LayerGroup();
   };
 
   // Define baseMaps object to hold base layers
@@ -105,10 +109,23 @@ function createFeatures(earthquakeData) {
   };
 
   // Create overlay object to hold our overlay layer
-  //Earthquake data from geojson
+  //Earthquake and fault lines data from geojson
   var overlayMaps = {
-    Earthquakes: earthquakes
+    Earthquakes: earthquakes,
+    "Fault Lines": tectonicplates
   };
+
+  // Add Fault lines data
+  d3.json(plateUrl, function(plateData) {
+    // Adding our geoJSON data, along with style information, to the tectonicplates
+    // layer.
+    L.geoJson(plateData, {
+      color: "#00008b",
+      weight: 2
+    })
+    .addTo(tectonicplates);
+});
+  
 
   //Create a layer control
   // Pass in our baseMaps and overlayMaps

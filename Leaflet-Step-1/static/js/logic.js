@@ -1,14 +1,14 @@
 //Grab URL
-var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
+var earthquakeUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
 // Perform a GET request to the query URL
-d3.json(queryUrl, function (data) {
+d3.json(earthquakeUrl, function (data) {
   console.log(data)
   // Once we get a response, send the data.features object to the createFeatures function
-  createFeatures(data.features);
+  createMap(data.features);
 });
 
-function createFeatures(earthquakeData) {
+function createMap(earthquakeData) {
 
 // Define base map layers
 //satellite
