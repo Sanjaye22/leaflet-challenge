@@ -43,9 +43,6 @@ function createMap(earthquakeData) {
     accessToken: API_KEY
   });
 
-  // Create map
-  var myMap = L.map("map").setView([37.09, -95.71], 5);
-
   //Array to holds all circles
   var circleArray = [];
 
@@ -109,6 +106,9 @@ function createMap(earthquakeData) {
   var overlayMaps = {
     Earthquakes: earthquakes
   };
+
+  // Create map
+  var myMap = L.map("map", {layers: [satellite, earthquakes]}).setView([37.09, -95.71], 5);
 
   //Create a layer control
   // Pass in our baseMaps and overlayMaps

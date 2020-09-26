@@ -43,9 +43,6 @@ function createMap(earthquakeData) {
     accessToken: API_KEY
   });
 
-  // Create map
-  var myMap = L.map("map").setView([37.09, -95.71], 5);
-
   //Array to holds all circles
   var circleArray = [];
 
@@ -113,6 +110,9 @@ function createMap(earthquakeData) {
     Earthquakes: earthquakes,
     "Fault Lines": tectonicplates
   };
+
+    // Create map
+    var myMap = L.map("map", {layers: [grayScale, earthquakes, tectonicplates]}).setView([37.09, -95.71], 5);
 
   // Add Fault lines data
   d3.json(plateUrl, function(plateData) {
